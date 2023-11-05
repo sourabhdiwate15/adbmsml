@@ -1,0 +1,523 @@
+1.	,14
+Implement Map reduces operation using MongoDB.
+Problem:A king want to count the total population in his country. He can send one person to count the population. The assigned person will visit every city serially and return with the total population in the country.
+> db.createCollection("MapReduce_King")
+{ "ok" : 1 }
+
+> db.MapReduce_King.insert({City: "Los Angels",Population: 300000})
+WriteResult({ "nInserted" : 1 })
+> db.MapReduce_King.insert({City: "Texas",Population: 42000})
+WriteResult({ "nInserted" : 1 })
+> db.MapReduce_King.insert({City: "Vegas",Population: 99000})
+WriteResult({ "nInserted" : 1 })
+> db.MapReduce_King.insert({City: "NashVille",Population: 30000})
+WriteResult({ "nInserted" : 1 })
+> db.MapReduce_King.insert({City: "EdinBurgh",Population: 900000})
+WriteResult({ "nInserted" : 1 })
+
+> var mapFunction2 = function() {emit(null, this.Population);};
+> var reduceFunction2= function(Country, Population) {return Array.sum(Population);};
+> db.MapReduce_King.mapReduce(mapFunction2, reduceFunction2, {out:"Result"});
+{ "result" : "Result", "ok" : 1 }
+> db.Result.find();
+{ "_id" : null, "value" : 1371000 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2,15.
+Implement aggregation and indexing with following example using MongoDB  
+Example:  In this Assignment, we are creating Student Database. Which contain the information ofstudent_name,student_rollno,status of a student. Here status is whether student is passed/failed by the university. 
+
+> db.createCollection("Student")
+{ "ok" : 1 }
+> db.Student.insert({Stud_Name: "Aarohi", Stud_Roll_No: 01, Status: "Passed"})
+WriteResult({ "nInserted" : 1 })
+> db.Student.insert({Stud_Name: "Vrushali", Stud_Roll_No: 02, Status: "Passed"})
+WriteResult({ "nInserted" : 1 })
+> db.Student.insert({Stud_Name: "Monica", Stud_Roll_No: 03, Status: "Passed"})
+WriteResult({ "nInserted" : 1 })
+> db.Student.insert({Stud_Name: "Joey", Stud_Roll_No: 04, Status: "Failed"})
+WriteResult({ "nInserted" : 1 })
+> db.Student.insert({Stud_Name: "Srinidhi", Stud_Roll_No: 05, Status: "Failed"})
+WriteResult({ "nInserted" : 1 })
+Craete Index:
+> db.Student.createIndex({Stud_Roll_No: 01})
+> db.Student.createIndex({Stud_Roll_No: 04})
+Get Index
+> db.Student.getIndexes()
+
+Drop index
+> db.Student.dropIndexes()
+{
+        "nIndexesWas" : 3,
+        "msg" : "non-_id indexes dropped for collection",
+        "ok" : 1
+}
+> db.Student.getIndexes()
+[ { "v" : 2, "key" : { "_id" : 1 }, "name" : "_id_" } ]
+> db.Student.createIndex({Stud_Roll_No: 04})
+{
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "createdCollectionAutomatically" : false,
+        "ok" : 1
+}
+> db.Student.dropIndex({Stud_Roll_No: 04})
+{ "nIndexesWas" : 2, "ok" : 1 }
+> db.Student.getIndexes()
+
+Aggregation:
+>db.Student.aggregate({$group:{_id:"$Status", sum:{$sum:"$Stud_Roll_No"}}})
+>db.Student.aggregate({$group:{_id:"$Stud_Roll_No", avg:{$avg:"$Stud_Roll_No"}}})
+>db.Student.aggregate({$group:{_id:"$Status", avg:{$avg:"$Stud_Roll_No"}}})
+> db.Student.aggregate({$group:{_id:"$max", max:{$max:"$Stud_Roll_No"}}})
+> db.Student.aggregate({$group:{_id:"$min", min:{$min:"$Stud_Roll_No"}}})
+> db.Student.aggregate({$group:{_id:"$Status", name:{$push:"$Stud_Name"}}})
+>db.Student.aggregate({$group:{_id:"$Status",sum:{$sum:"$Stud_Roll_No"}}}, $match:{sum:{$lte: 7}}})
+>db.Student.aggregate({$group:{_id:"$Status",sum:{$sum:"$Stud_Roll_No"}}}, {$match:{sum:{$gte: 7}}})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. 
+Implement queries using MongoDB
+Teacher_id	Teacher_Name	Dept_Name, 	Salary 	Status 
+Pic001 	Ravi 	IT 	30000 	A 
+Pic002 	Mangesh	IT 	20000 	A 
+Pic003 	Akshay	Comp 	25000 	N 
+a.	Create Collection, Insert data into collection,FindAll,findOne(with condition)
+
+> db.createCollection("Teacher")
+{ "ok" : 1 }
+> db.Teacher.insert({Teacher_id: "Pic001", Teacher_Name: "Ravi", Dept_Name: "IT", Salary:30000, Status: "A"})
+> db.Teacher.insert({Teacher_id: "Pic002", Teacher_Name: "Mangesh", Dept_Name: "IT",Salary: 20000, Status: "A"})
+> db.Teacher.insert({Teacher_id: "Pic003", Teacher_Name: "Akshay", Dept_Name: "Comp", Salary: 25000, Status: "N"})
+> db.Teacher.find();
+> db.Teacher.findOne();
+> db.Teacher.findOne({Teacher_id:"Pic003"});
+> db.Teacher.findOne({Salary:{$eq: 30000}});
+> db.Teacher.find({Salary:{$eq: 30000}});
+
+b.	Find teacher who is having salary greater than 50000 and status is A
+>db.Teacher.find({$and:[{Salary:{$gte: 30000}},{Status:{$eq:"A"}}]}).pretty();
+
+c.	Find teacher who is having salary greater than 50000 OR status is A
+> db.Teacher.find({$or:[{Salary:{$gte: 30000}},{Status:{$eq:"A"}}]}).pretty();
+
+d.	Display teacher info in ascending and descending order.
+> db.Teacher.find().sort({key:1}).pretty();
+> db.Teacher.find().sort({key:-1}).pretty();
+
+e.	Find teacher from different departments.
+> db.Teacher.find({Dept_Name: "IT"});
+
+f.	Update dept_name to ETC of techer_id= Pic002
+>db.Teacher.update({Teacher_id: "Pic002"},{$set:{Dept_Name:"ENTC"}})
+> db.Teacher.find()
+
+g.	Increment the salary of teacher by 10000 who is having Status A
+> db.Teacher.updateMany({},{$inc: {Salary: 10000}})
+> db.Teacher.updateMany({Status: "A"},{$inc: {Salary: 10000}})
+> db.Teacher.find()
+
+h.	Delete teacher of teacher_id=Pic001
+> db.Teacher.deleteOne({Teacher_id: "Pic001"})
+> db.Teacher.find()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4,11 .
+Student_id	Student_Name	Dept_Name, 	Fees	Result
+101E	Ravi 	IT 	30000 	Pass
+102E	Mangesh	IT 	20000 	Pass
+103F	Akshay	Comp 	25000 	Fail
+
+•	Insert one document at a time
+> db.Chit4.insert({Student_id: "101E", Student_Name: "Ravi", Dept_Name: "IT", Fees: 30000, Result: "Pass"})
+
+•	Insert Multiple documents using batch insert.
+> var student= [{Student_id: "102E", Student_Name: "Mangesh", Dept_Name: "IT", Fees: 20000, Result: "Pass"},{Student_id: "103F", Student_Name: "Akshay", Dept_Name: "Comp", Fees: 25000, Result: "Fail"}]
+> db.Chit4.insert(student)
+BulkWriteResult({
+        "writeErrors" : [ ],
+        "writeConcernErrors" : [ ],
+        "nInserted" : 2,
+        "nUpserted" : 0,
+        "nMatched" : 0,
+        "nModified" : 0,
+        "nRemoved" : 0,
+        "upserted" : [ ]
+})
+						Or
+
+>db.Chit4.insertMany([{Student_id: "102E", Student_Name: "Mangesh", Dept_Name: "IT", Fees: 20000, Result: "Pass"},{Student_id: "103F", Student_Name: "Akshay", Dept_Name: "Comp", Fees: 25000, Result: "Fail"}])
+
+> db.Chit4.find()
+
+
+•	Remove a document using $where.
+> db.Chit4.remove({$where: function() {return (this.Student_id == "101E")}});
+WriteResult({ "nRemoved" : 1 })
+
+•	Update a document using $where.
+
+•	Upserting a document using save().
+> db.Chit4.save({Student_id: "106A", Student_Name: "Ryan", Dept_Name: "IT", Fees: 40000, Result: "Pass"})
+WriteResult({ "nInserted" : 1 })
+> db.Chit4.find();
+>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5,17.
+Implement aggregation and indexing (all three) with example using MongoDB
+Indexing:
+> db.Student.find().pretty();
+1. Create Index:
+> db.Student.createIndex({Stud_id: 01})
+> db.Student.createIndex({Stud_id: 06})
+2. Get Index:
+> db.Student.getIndexes()
+3. Drop Index:
+> db.Student.dropIndex({Stud_id: 6})
+Aggregation Functions:
+> db.createCollection("Employee")
+> db.Employee.insert({Emp_id: 01, Emp_Name: "Emily", Emp_Sal: 10000, Emp_Dept: "IT"});
+> db.Employee.insert({Emp_id: 02, Emp_Name: "Christine", Emp_Sal: 15000, Emp_Dept: "IT"});
+> db.Employee.insert({Emp_id: 03, Emp_Name: "Alexa", Emp_Sal: 25000, Emp_Dept: "Comp"});
+> db.Employee.insert({Emp_id: 04, Emp_Name: "Albert", Emp_Sal: 10000, Emp_Dept: "Comp"});
+> db.Employee.insert({Emp_id: 05, Emp_Name: "Annabella", Emp_Sal: 100000, Emp_Dept: "IT"});
+> db.Employee.insert({Emp_id: 06, Emp_Name: "Joey", Emp_Sal: 30000, Emp_Dept: "Civil"});
+> db.Employee.insert({Emp_id: 07, Emp_Name: "Emma", Emp_Sal: 30000, Emp_Dept: "Mech"});
+> db.Employee.insert({Emp_id: 08, Emp_Name: "Ariana", Emp_Sal: 20000, Emp_Dept: "ENTC"});
+> db.Employee.find().pretty();
+1. Sum:
+> db.Employee.aggregate({$group:{_id:"$Emp_Dept" ,sum:{$sum:"$Emp_Sal"}}})
+2.Average :
+> db.Employee.aggregate({$group:{_id : "$Emp_Dept, avg :{$avg :  "$Emp_Sal"}}})
+3.Maximum :
+> db.Employee.aggregate({$group:{_id : "$max”, max:{$max :  "$Emp_Sal"}}})
+4.Min :
+> db.Employee.aggregate({$group:{_id : "$min”, min:{$min :  "$Emp_Sal"}}})
+5.Push :
+> db.Employee.aggregate({$group:{_id : "$Emp_Dept", name :{$push : "$Emp_Name"}}})
+6. Match:
+> db.Employee.aggregate({$group:{_id:"$Emp_Dept" ,sum:{$sum:"$Emp_Sal"}}},{$match:{sum:{$gte:120000}}})
+> db.Employee.aggregate({$group:{_id:"$Emp_Dept" ,sum:{$sum:"$Emp_Sal"}}},{$match:{sum:{$lte:120000}}})
+
+
+
+
+
+
+
+
+
+
+
+
+
+6,18.
+Execute at least 10 queries on following database that demonstrates following querying
+techniques:
+	Book(Book_id,Book_Name,Author,Price,No_of_Pages)
+
+•	Display all books from the collection.
+> db.Book.insertMany([{Book_Name: "Wings of Fire", Author: "ABC", Price: 350, No_of_Pages: 300},{Book_Name: "Hello its Me", Author: "ABCD", Price: 4550, No_of_Pages: 600},{Book_Name: "Aishwarya", Author: "ABCDE", Price: 550, No_of_Pages: 200}])
+
+> db.Book.find()
+
+•	Display one book using findOne
+> db.Book.findOne()
+
+> db.Book.findOne({Book_Name:"Aishwarya"})
+
+•	Display all books having price greater than 300 using $gt.
+
+> db.Book.find({Price:{$gt: 350}})
+
+•	Display all books having price less than 300 using $lt AND No_of_pages greater than 1000 using $gt.
+> db.Book.find({$and: [{Price:{$gt: 350}},{No_of_Pages:{$gt:200}}]})
+
+•	Display all books having price less than or equal to 300 using $lte ORNo_of_pages greater than or equal to 1000 using $gte.
+> db.Book.find({$or:[{Price:{$lte: 350}},{No_of_Pages:{$gte: 1000}}]}).pretty();
+> db.Book.find({$or:[{Price:{$lte: 350}},{No_of_Pages:{$gte: 500}}]}).pretty();
+
+•	Use $not.
+> db.Book.find({Price:{$not:{$lte: 400}}}).pretty();
+
+•	Accept a Null value in a document.
+> db.Book.insert({Book_Name: "Random", Author: "Ariana", Price: 700, No_of_Pages: ""})
+> db.Book.find();
+>
+•	Find all books whose name starts with ‘b’ using $regex.
+> db.Book.find({Book_Name: {$regex: /ing/i}})
+> db.Book.find({Book_Name: {$regex: /rya/i}})
+
+
+
+7.
+Execute at least 10 queries on any suitable MongoDB database that demonstrates following:
+Mobile_Specs(Mobile_Name,RAM,Price,Camera)
+
+> db.createCollection("Mobile_Specs")
+
+> db.Mobile_Specs.insertMany([{Mobile_Name: "Realme", RAM: 16, Price: 15000, Camera: 17},{Mobile_Name: "Oppo", RAM: 32, Price: 20000, Camera: 45},])
+
+> db.Mobile_Specs.insertMany([{Mobile_Name: "Redmi", RAM: 64, Price: 18000, Camera: 12},{Mobile_Name: "Poco", RAM: 32, Price: 27000, Camera: 68},{Mobile_Name: "Iphone", RAM: 512, Price: 70000, Camera: 90},{Mobile_Name: "Realme", RAM: 32, Price: 25000, Camera: 40},{Mobile_Name: "Itel", RAM: 16, Price: 12000, Camera: 12}])
+
+> db.Mobile_Specs.find();
+
+•	Find all mobiles which have 16GB RAM using $where.
+> db.Mobile_Specs.find({$where: function() {return (this.RAM == "16")}});
+
+•	Limit the display records to 5.
+> db.Mobile_Specs.find().limit(5)
+
+•	Sort the mobiles in ascending order in price.
+> db.Mobile_Specs.find().sort({Price: 1})
+
+•	Sort the mobiles in descending order of RAM.
+> db.Mobile_Specs.find().sort({RAM: -1})
+
+•	Skip the first 5 records using cursor while displaying.
+> var mycursor=db.Mobile_Specs.find().skip(5).pretty();
+> mycursor;
+
+
+
+
+
+
+
+
+8.
+Implement aggregation and indexing with suitable example using MongoDB  (Same AS Chit 5)
+Indexing:
+> db.Student.find().pretty();
+1. Create Index:
+> db.Student.createIndex({Stud_id: 01})
+> db.Student.createIndex({Stud_id: 06})
+2. Get Index:
+> db.Student.getIndexes()
+3. Drop Index:
+> db.Student.dropIndex({Stud_id: 6})
+Aggregation Functions:
+> db.createCollection("Employee")
+> db.Employee.insert({Emp_id: 01, Emp_Name: "Emily", Emp_Sal: 10000, Emp_Dept: "IT"});
+> db.Employee.insert({Emp_id: 02, Emp_Name: "Christine", Emp_Sal: 15000, Emp_Dept: "IT"});
+> db.Employee.insert({Emp_id: 03, Emp_Name: "Alexa", Emp_Sal: 25000, Emp_Dept: "Comp"});
+> db.Employee.insert({Emp_id: 04, Emp_Name: "Albert", Emp_Sal: 10000, Emp_Dept: "Comp"});
+> db.Employee.insert({Emp_id: 05, Emp_Name: "Annabella", Emp_Sal: 100000, Emp_Dept: "IT"});
+> db.Employee.insert({Emp_id: 06, Emp_Name: "Joey", Emp_Sal: 30000, Emp_Dept: "Civil"});
+> db.Employee.insert({Emp_id: 07, Emp_Name: "Emma", Emp_Sal: 30000, Emp_Dept: "Mech"});
+> db.Employee.insert({Emp_id: 08, Emp_Name: "Ariana", Emp_Sal: 20000, Emp_Dept: "ENTC"});
+> db.Employee.find().pretty();
+1. Sum:
+> db.Employee.aggregate({$group:{_id:"$Emp_Dept" ,sum:{$sum:"$Emp_Sal"}}})
+2.Average :
+> db.Employee.aggregate({$group:{_id : "$Emp_Dept, avg :{$avg :  "$Emp_Sal"}}})
+3.Maximum :
+> db.Employee.aggregate({$group:{_id : "$max”, max:{$max :  "$Emp_Sal"}}})
+4.Min :
+> db.Employee.aggregate({$group:{_id : "$min”, min:{$min :  "$Emp_Sal"}}})
+5.Push :
+> db.Employee.aggregate({$group:{_id : "$Emp_Dept", name :{$push : "$Emp_Name"}}})
+6. Match:
+> db.Employee.aggregate({$group:{_id:"$Emp_Dept" ,sum:{$sum:"$Emp_Sal"}}},{$match:{sum:{$gte:120000}}})
+> db.Employee.aggregate({$group:{_id:"$Emp_Dept" ,sum:{$sum:"$Emp_Sal"}}},{$match:{sum:{$lte:120000}}})
+
+      
+
+
+
+
+
+
+
+
+
+9.
+a.	Implement Map reduces operation using MongoDB.
+        Problem: College student data (FE,SE,TE,BE)
+
+> db.createCollection("Students")
+> db.Students.insert({Stud_Name: "Christine", Stud_Year: "SE", Pending_Fees: 25000});
+> db.Students.insert({Stud_Name: "Sydney", Stud_Year: "TE", Pending_Fees: 40000});
+> db.Students.insert({Stud_Name: "Chandler", Stud_Year: "FE", Pending_Fees: 7000});
+
+> db.Students.insert({Stud_Name: "Joshua", Stud_Year: "TE", Pending_Fees: 30000});
+> db.Students.insert({Stud_Name: "Jeremy", Stud_Year: "SE", Pending_Fees: 20000});
+> db.Students.insert({Stud_Name: "Joey", Stud_Year: "FE", Pending_Fees: 37000});
+> db.Students.insert({Stud_Name: "Mary", Stud_Year: "SE", Pending_Fees: 44000});
+> db.Students.insert({Stud_Name: "Martha", Stud_Year: "BE", Pending_Fees: 50000});
+> db.Students.insert({Stud_Name: "Monica", Stud_Year: "BE", Pending_Fees: 70000});
+> var mapFunction1 =function() {emit(this.Stud_Year, this.Pending_Fees);};
+> var reduceFunction1 =function (keyStud_Year, Pending_Fees){return Array.sum(Pending_Fees);};
+>db.Student.mapReduce(mapFunction1,reduceFunction1, {out:"Pending_Fees_List"})
+> db.Pending_Fees_List.find();
+
+
+
+
+
+
+
+
+
+
+
+10,13.
+Consider the following database: 
+Employee (emp_no, name, skill, pay rate) 
+
+Insert one document at a time 
+> db.Employee.insert({Emp_No: 1011, Name: "Srinidhi", Skill: "Developer", Pay_Rate: 20000})
+
+Insert Multiple documents using batch insert. 
+> db.Employee.insertMany([{Emp_No: 1012, Name: "Ovi", Skill: "Tester", Pay_Rate: 25000},{Emp_No: 1013, Name: "Sanchi", Skill: "Analyst Trainee", Pay_Rate: 35000},{Emp_No: 1014, Name: "Suresh", Skill: "Assistent Trainee", Pay_Rate: 22000},{Emp_No: 1015, Name: "Girish", Skill: "Programmer", Pay_Rate: 29000}])
+> db.Employee.find()
+
+Remove a document using $where. 
+> db.Employee.remove({$where: function() {return (this.Emp_No == "1013")}});
+WriteResult({ "nRemoved" : 1 })
+
+Update a document using $where. 
+db.Employee.updateOne({$where:function(){return 	this.Name== "Ovi"}},{$set:{Pay_Rate:25000}})
+
+Upserting a document using save(). 
+> db.Employee.save({Emp_No: 1016, Name: "Nilisha", Skill: "Senior Developer", Pay_Rate: 40000})
+WriteResult({ "nInserted" : 1 })
+
+
+
+
+
+
+
+
+
+12.
+Position (posting_no, skill)
+Duty_allocation (posting_no, emp_no, day, shift(day/night))
+
+Insert one document at a time 
+Insert Multiple documents using batch insert. 
+Remove a document using $where. 
+Update a document using $where. 
+Upserting a document using save(). 
+
+Pratik Lahane B: db.createCollection("Duty1")
+PratikLahaneB:db.Duty1.insertOne({Post_no:101,emp_no:'E1',day:"Monday",shift:"Day"})
+PratikLahaneB:db.Duty1.insertMany([{Post_no:102,emp_no:'E2',day:"Tuesday",shift:"Day"},{Post_no:103,emp_no:'E3',day:"Wednesday",shift:"Night"},{Post_no:104,emp_no:'E4',day:"Thursday",shift:"Day"}])
+Pratik Lahane B: db.Duty1.updateOne({$where: function() {return this.Post_no == 102}},{$set:{shift:"Night"}})
+Pratik Lahane B: db.Duty1.remove({$where: function() {return this.Post_no == 104}})
+Pratik Lahane B: after performing each operation do find query
+Pratik Lahane B: db.Duty1.find()
+
+
+						
+
+
+
+
+
+
+16.
+Student_id 	Student_Name 	Dept_Name, 	Fees 	Result 
+101E 	Ravi 	IT 	30000 	Pass 
+102E 	Mangesh 	IT 	20000 	Pass 
+103F 	Akshay 	Comp 	25000 	Fail 
+
+Insert one document at a time 
+Insert Multiple documents using batch insert. 
+Remove a document using $where. 
+Update a document using $where. 
+Upserting a document using save(). 
+ 
+
+
+Pratik Lahane B: 37_Pratik> db.createCollection("Term")                    37_Pratik> db.Term.insertOne({Stud_id:'101E',Stud_name:"Ravi",Dept:"IT",Fees:30000,Result:"Pass"})
+Pratik Lahane B: 37_Pratik> db.Term.insertMany([{Stud_id:'102E',Stud_name:"Mangesh",Dept:"IT",Fees:20000,Result:"Pass"},{Stud_id:'103E',Stud_name:"Akshay",Dept:"Comp",Fees:25000,Result:"Fail"}])
+Pratik Lahane B: db.Term.updateOne({$where: function() {return this.Stud_name == 'Ravi'}},{$set:{Fees:30000}})
+Pratik Lahane B: db.Term.remove({$where: function() {return this.Stud_name == 'Ravi'}})
+
